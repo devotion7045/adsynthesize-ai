@@ -1,0 +1,6 @@
+{
+  "name": "AdSynthesize AI",
+  "description": "High-performance AI advertising suite for competitor audits, ad copy generation, banner design, video creation, and budget optimization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
