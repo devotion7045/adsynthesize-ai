@@ -89,23 +89,47 @@ export const BudgetOptimizerView: React.FC = () => {
     const roasNum = parseFloat(targetRoas) || 4.5;
 
     try {
-      const res = await fetch('/api/optimize-budget', {
+      const res = await fetch('/api/v1/ads/optimize-budget', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          dailyBudget: budgetNum,
-          targetRoas: roasNum,
-          adSets: data.adSets,
+          campaign_name: 'Q3 Growth Campaign',
+          total_daily_budget: budgetNum,
+          target_roas: roasNum,
+          ad_sets: data.adSets.map((a) => ({
+            ad_set_id: a.id,
+            ad_set_name: a.name,
+            spend: a.spend,
+            clicks: a.clicks,
+            impressions: a.impressions,
+            conversions: a.conversions,
+            conversion_value: a.convValue,
+          })),
         }),
       });
       const json = await res.json();
       if (json.success && json.data) {
         setData((prev) => ({
           ...prev,
-          projectedRevenue: json.data.newProjectedRevenue || Math.round(budgetNum * roasNum * 1.15),
-          avgCpc: json.data.newAvgCpc || 0.38,
-          conversions: json.data.newConversions || Math.round((budgetNum / 2.8) * 0.95),
-          adScore: json.data.newAdScore || 9.6,
+          projectedRevenue:
+            json.data.projected_revenue ||
+            json.data.projectedRevenue ||
+            json.data.newProjectedRevenue ||
+            Math.round(budgetNum * roasNum * 1.15),
+          avgCpc:
+            json.data.avg_cpc ||
+            json.data.avgCpc ||
+            json.data.newAvgCpc ||
+            0.38,
+          conversions:
+            json.data.conversions ||
+            json.data.newConversions ||
+            Math.round((budgetNum / 2.8) * 0.95),
+          adScore:
+            json.data.ad_score ||
+            json.data.adScore ||
+            json.data.newAdScore ||
+            9.6,
         }));
       }
     } catch (e) {

@@ -36,11 +36,39 @@ export const BannerStudioView: React.FC = () => {
     setTilt({ rx: 0, ry: 0 });
   };
 
-  const handleGenerateBanners = () => {
+  const handleGenerateBanners = async () => {
     setIsGenerating(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/v1/ads/generate-banner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          headline: config.headline,
+          subheadline: config.subheadline,
+          call_to_action: config.ctaText,
+          brand_color_hex: config.brandHex,
+          accent_color_hex: config.accentHex,
+          aspect_ratios: [config.aspectRatio],
+        }),
+      });
+      const json = await res.json();
+      if (json.success && json.banner) {
+        setConfig((prev) => ({
+          ...prev,
+          headline: json.banner.headline || prev.headline,
+          subheadline: json.banner.subheadline || prev.subheadline,
+          ctaText: json.banner.call_to_action || json.banner.ctaText || prev.ctaText,
+          brandHex: json.banner.brand_color_hex || json.banner.brandHex || prev.brandHex,
+          accentHex: json.banner.accent_color_hex || json.banner.accentHex || prev.accentHex,
+          badgeText: json.banner.badge_text || json.banner.badgeText || prev.badgeText,
+          memberCount: json.banner.member_count || json.banner.memberCount || prev.memberCount,
+        }));
+      }
+    } catch (e) {
+      console.error('Error generating banner:', e);
+    } finally {
       setIsGenerating(false);
-    }, 1200);
+    }
   };
 
   const handleDownloadBanner = () => {

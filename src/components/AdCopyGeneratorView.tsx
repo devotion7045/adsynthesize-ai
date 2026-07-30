@@ -59,13 +59,13 @@ export const AdCopyGeneratorView: React.FC<AdCopyGeneratorViewProps> = ({
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      const res = await fetch('/api/generate-copy', {
+      const res = await fetch('/api/v1/ads/generate-copy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          productName,
+          product_or_service_name: productName,
           description,
-          targetAudience,
+          target_audience: targetAudience,
           platform,
           framework,
           tone,

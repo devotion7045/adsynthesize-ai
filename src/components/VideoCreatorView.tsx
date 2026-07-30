@@ -71,6 +71,34 @@ export const VideoCreatorView: React.FC = () => {
     setHooks(hooks.filter((_, i) => i !== index));
   };
 
+  const [isSynthesizing, setIsSynthesizing] = useState(false);
+
+  const handleGenerateVideo = async () => {
+    setIsSynthesizing(true);
+    try {
+      const res = await fetch('/api/v1/ads/generate-video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brand_name: brandIdentity,
+          hooks: hooks,
+          call_to_action: ctaText,
+          duration_per_slide_sec: slideDuration,
+        }),
+      });
+      const json = await res.json();
+      if (json.success && json.video && json.video.slides) {
+        setSlides(json.video.slides);
+        setActiveSlideIndex(0);
+        setIsPlaying(true);
+      }
+    } catch (e) {
+      console.error('Error generating video:', e);
+    } finally {
+      setIsSynthesizing(false);
+    }
+  };
+
   const currentSlide = slides[activeSlideIndex] || slides[0];
 
   return (
@@ -192,14 +220,14 @@ export const VideoCreatorView: React.FC = () => {
           {/* Synthesize Action */}
           <div className="pt-4">
             <button
-              onClick={() => {
-                setIsPlaying(true);
-                alert('Synthesizing video sequence with AI motion effects...');
-              }}
-              className="w-full bg-[#c0c1ff] text-[#1000a9] hover:bg-[#8083ff] py-3 rounded-lg font-bold font-mono text-xs hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+              onClick={handleGenerateVideo}
+              disabled={isSynthesizing}
+              className="w-full bg-[#c0c1ff] text-[#1000a9] hover:bg-[#8083ff] py-3 rounded-lg font-bold font-mono text-xs hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50"
             >
-              <span className="material-symbols-outlined text-[20px]">auto_videocam</span>
-              <span>Synthesize Draft</span>
+              <span className="material-symbols-outlined text-[20px]">
+                {isSynthesizing ? 'sync' : 'auto_videocam'}
+              </span>
+              <span>{isSynthesizing ? 'Synthesizing...' : 'Synthesize Draft'}</span>
             </button>
           </div>
         </div>

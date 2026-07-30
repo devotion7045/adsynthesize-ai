@@ -84,25 +84,26 @@ export const CompetitorAuditView: React.FC<CompetitorAuditViewProps> = ({
   const handleRunAudit = async () => {
     setIsAuditing(true);
     try {
-      const res = await fetch('/api/audit', {
+      const res = await fetch('/api/v1/intelligence/audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          domain: domain,
-          competitors: competitorsInput,
+          domain_or_niche: domain,
+          competitors: competitorsInput.split(',').map((s) => s.trim()).filter(Boolean),
         }),
       });
       const json = await res.json();
       if (json.success && json.data) {
         setAuditResult((prev) => ({
           ...prev,
-          domainOrNiche: domain || prev.domainOrNiche,
-          adSpendEstimate: json.data.adSpendEstimate || '$1.4M',
-          momChange: json.data.momChange || '+14.2%',
-          keywordOverlap: json.data.keywordOverlap || '68.5%',
-          totalCreativeVolume: json.data.totalCreativeVolume || '450 Ads',
-          activeChannelsCount: json.data.activeChannelsCount || 28,
+          domainOrNiche: json.data.domain_or_niche || domain || prev.domainOrNiche,
+          adSpendEstimate: json.data.ad_spend_estimate || json.data.adSpendEstimate || '$1.4M',
+          momChange: json.data.mom_change || json.data.momChange || '+14.2%',
+          keywordOverlap: json.data.keyword_overlap || json.data.keywordOverlap || '68.5%',
+          totalCreativeVolume: json.data.total_creative_volume || json.data.totalCreativeVolume || '450 Ads',
+          activeChannelsCount: json.data.active_channels_count || json.data.activeChannelsCount || 28,
           auditIntelligenceSummary:
+            json.data.audit_intelligence_summary ||
             json.data.auditIntelligenceSummary ||
             `AI audit completed for ${domain}. Analyzed ad formats across Meta, Google, and LinkedIn.`,
         }));
