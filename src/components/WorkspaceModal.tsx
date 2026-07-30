@@ -50,25 +50,25 @@ export const WorkspaceModal: React.FC<WorkspaceModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
-      <div className="bg-[#1c1b1d] border border-[#464554] rounded-2xl max-w-2xl w-full p-6 space-y-6 shadow-2xl relative">
-        <div className="flex justify-between items-center border-b border-[#464554] pb-4">
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-filled text-[#c0c1ff] text-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md">
+      <div className="bg-[#1c1b1d] border border-[#464554] rounded-2xl max-w-2xl w-full p-4 sm:p-6 space-y-4 sm:space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div className="flex justify-between items-center border-b border-[#464554] pb-3 sm:pb-4">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <span className="material-symbols-filled text-[#c0c1ff] text-xl sm:text-2xl">
               workspaces
             </span>
             <div>
-              <h2 className="text-xl font-bold text-[#e5e1e4]">Workspace Manager</h2>
-              <p className="font-mono text-xs text-[#c7c4d7]">
+              <h2 className="text-lg sm:text-xl font-bold text-[#e5e1e4]">Workspace Manager</h2>
+              <p className="font-mono text-[11px] sm:text-xs text-[#c7c4d7]">
                 Manage saved campaigns, exports, and active AI strategy sessions
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-[#c7c4d7] hover:text-[#e5e1e4] p-1 cursor-pointer"
+            className="text-[#c7c4d7] hover:text-[#e5e1e4] p-1 cursor-pointer shrink-0"
           >
-            <span className="material-symbols-outlined text-[24px]">close</span>
+            <span className="material-symbols-outlined text-[22px]">close</span>
           </button>
         </div>
 

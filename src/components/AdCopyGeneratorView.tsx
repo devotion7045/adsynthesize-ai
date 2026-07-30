@@ -8,6 +8,7 @@ interface AdCopyGeneratorViewProps {
 export const AdCopyGeneratorView: React.FC<AdCopyGeneratorViewProps> = ({
   initialCompetitorAd,
 }) => {
+  const [mobileTab, setMobileTab] = useState<'inputs' | 'variants'>('variants');
   const [productName, setProductName] = useState(
     initialCompetitorAd ? `Anti-${initialCompetitorAd.competitor} Solution` : 'Lumina Pro Headphones'
   );
@@ -88,9 +89,37 @@ export const AdCopyGeneratorView: React.FC<AdCopyGeneratorViewProps> = ({
   };
 
   return (
-    <div className="flex-grow flex flex-col md:flex-row overflow-hidden pt-4 px-4 sm:px-6 gap-6 max-w-[1600px] mx-auto w-full">
+    <div className="flex-grow flex flex-col md:flex-row overflow-hidden pt-3 sm:pt-4 px-3 sm:px-6 pb-24 md:pb-8 gap-4 sm:gap-6 max-w-[1600px] mx-auto w-full">
+      {/* Mobile Segmented Control Toggle */}
+      <div className="md:hidden flex p-1 bg-[#201f22] border border-[#464554] rounded-xl mb-1">
+        <button
+          onClick={() => setMobileTab('inputs')}
+          className={`flex-1 py-2 font-mono text-xs rounded-lg font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            mobileTab === 'inputs'
+              ? 'bg-[#c0c1ff] text-[#1000a9] shadow'
+              : 'text-[#c7c4d7] hover:text-[#e5e1e4]'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[18px]">edit_note</span>
+          <span>Inputs</span>
+        </button>
+        <button
+          onClick={() => setMobileTab('variants')}
+          className={`flex-1 py-2 font-mono text-xs rounded-lg font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            mobileTab === 'variants'
+              ? 'bg-[#c0c1ff] text-[#1000a9] shadow'
+              : 'text-[#c7c4d7] hover:text-[#e5e1e4]'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
+          <span>Variants ({variants.length})</span>
+        </button>
+      </div>
+
       {/* Left Panel: Form Controls */}
-      <aside className="w-full md:w-[380px] shrink-0 overflow-y-auto pb-8">
+      <aside className={`w-full md:w-[380px] shrink-0 overflow-y-auto pb-6 ${
+        mobileTab === 'inputs' ? 'block' : 'hidden md:block'
+      }`}>
         <div className="space-y-6">
           <div className="flex items-center gap-2 mb-2">
             <span className="material-symbols-filled text-[#c0c1ff]">edit_note</span>
@@ -223,12 +252,14 @@ export const AdCopyGeneratorView: React.FC<AdCopyGeneratorViewProps> = ({
       </aside>
 
       {/* Right Panel: Preview Area */}
-      <section className="flex-grow bg-[#1c1b1d] rounded-t-3xl border-t border-x border-[#464554] p-5 sm:p-6 overflow-y-auto min-h-[600px]">
-        <div className="max-w-5xl mx-auto space-y-8">
+      <section className={`flex-grow bg-[#1c1b1d] rounded-2xl md:rounded-t-3xl border border-[#464554] p-4 sm:p-6 overflow-y-auto min-h-[400px] sm:min-h-[600px] ${
+        mobileTab === 'variants' ? 'block' : 'hidden md:block'
+      }`}>
+        <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
           <div className="flex justify-between items-end border-b border-[#464554]/60 pb-4">
             <div>
-              <h3 className="text-xl font-bold text-[#e5e1e4]">Generated Variants</h3>
-              <p className="text-sm text-[#c7c4d7] mt-1">
+              <h3 className="text-lg sm:text-xl font-bold text-[#e5e1e4]">Generated Variants</h3>
+              <p className="text-xs sm:text-sm text-[#c7c4d7] mt-1">
                 Based on {framework} framework for {platform} Ads • Tone: {tone}
               </p>
             </div>
@@ -238,7 +269,7 @@ export const AdCopyGeneratorView: React.FC<AdCopyGeneratorViewProps> = ({
                 className="p-2 border border-[#464554] rounded-lg hover:bg-[#2a2a2c] text-[#c7c4d7] hover:text-[#e5e1e4] transition-colors cursor-pointer"
                 title="Regenerate Copy"
               >
-                <span className={`material-symbols-outlined text-[20px] ${isGenerating ? 'animate-spin' : ''}`}>
+                <span className={`material-symbols-outlined text-[18px] sm:text-[20px] ${isGenerating ? 'animate-spin' : ''}`}>
                   refresh
                 </span>
               </button>
@@ -254,25 +285,25 @@ export const AdCopyGeneratorView: React.FC<AdCopyGeneratorViewProps> = ({
                 className="p-2 border border-[#464554] rounded-lg hover:bg-[#2a2a2c] text-[#c7c4d7] hover:text-[#e5e1e4] transition-colors cursor-pointer"
                 title="Download JSON"
               >
-                <span className="material-symbols-outlined text-[20px]">download</span>
+                <span className="material-symbols-outlined text-[18px] sm:text-[20px]">download</span>
               </button>
             </div>
           </div>
 
           {/* Bento Grid Layout for Cards */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
             {variants.map((v, idx) => {
               const isThird = idx === 2;
               return (
                 <div
                   key={v.id || idx}
-                  className={`glass-panel rounded-2xl p-6 flex flex-col gap-4 relative group hover:border-[#8083ff]/50 transition-all ${
+                  className={`glass-panel rounded-2xl p-4 sm:p-6 flex flex-col gap-4 relative group hover:border-[#8083ff]/50 transition-all ${
                     isThird ? 'xl:col-span-2' : ''
                   }`}
                 >
                   <div className="flex justify-between items-center">
                     <span
-                      className={`text-xs font-mono px-2.5 py-1 rounded border ${
+                      className={`text-[11px] font-mono px-2.5 py-0.5 rounded border ${
                         v.tagColor === 'secondary'
                           ? 'bg-[#00a572]/10 text-[#4edea3] border-[#00a572]/30'
                           : v.tagColor === 'tertiary'
@@ -287,44 +318,44 @@ export const AdCopyGeneratorView: React.FC<AdCopyGeneratorViewProps> = ({
                       className="text-[#c7c4d7] hover:text-[#e5e1e4] transition-colors p-1 cursor-pointer"
                       title="Copy Variant Text"
                     >
-                      <span className="material-symbols-outlined text-[20px]">
+                      <span className="material-symbols-outlined text-[18px]">
                         {copiedId === (v.id || String(idx)) ? 'done' : 'content_copy'}
                       </span>
                     </button>
                   </div>
 
-                  <div className={isThird ? 'grid md:grid-cols-2 gap-6' : 'space-y-4'}>
-                    <div className="space-y-4">
+                  <div className={isThird ? 'grid md:grid-cols-2 gap-4 sm:gap-6' : 'space-y-3 sm:space-y-4'}>
+                    <div className="space-y-3 sm:space-y-4">
                       <div>
-                        <h4 className="font-mono text-[11px] text-[#908fa0] font-bold uppercase mb-1">
+                        <h4 className="font-mono text-[10px] sm:text-[11px] text-[#908fa0] font-bold uppercase mb-1">
                           Headline
                         </h4>
-                        <p className="text-lg font-bold text-[#e5e1e4]">{v.headline}</p>
+                        <p className="text-base sm:text-lg font-bold text-[#e5e1e4]">{v.headline}</p>
                       </div>
 
                       <div>
-                        <h4 className="font-mono text-[11px] text-[#908fa0] font-bold uppercase mb-1">
+                        <h4 className="font-mono text-[10px] sm:text-[11px] text-[#908fa0] font-bold uppercase mb-1">
                           Primary Text
                         </h4>
-                        <p className="text-sm text-[#c7c4d7] leading-relaxed whitespace-pre-line">
+                        <p className="text-xs sm:text-sm text-[#c7c4d7] leading-relaxed whitespace-pre-line">
                           {v.primaryText}
                         </p>
                       </div>
                     </div>
 
                     {isThird && (
-                      <div className="bg-[#353437] rounded-xl p-6 border border-[#464554] flex items-center justify-center">
+                      <div className="bg-[#353437] rounded-xl p-4 sm:p-6 border border-[#464554] flex items-center justify-center">
                         <div className="text-center">
-                          <span className="material-symbols-outlined text-4xl text-[#c0c1ff] mb-2">
+                          <span className="material-symbols-outlined text-3xl sm:text-4xl text-[#c0c1ff] mb-1">
                             trending_up
                           </span>
-                          <p className="font-mono text-xs text-[#908fa0] uppercase">
+                          <p className="font-mono text-[10px] sm:text-xs text-[#908fa0] uppercase">
                             Performance Prediction
                           </p>
-                          <p className="text-4xl font-bold text-[#c0c1ff] my-1">
+                          <p className="text-3xl sm:text-4xl font-bold text-[#c0c1ff] my-1">
                             {v.predictionRating || 'High'}
                           </p>
-                          <p className="text-sm text-[#c7c4d7]">
+                          <p className="text-xs text-[#c7c4d7]">
                             {v.bestForNote || 'Best for Retargeting Campaigns'}
                           </p>
                         </div>
@@ -332,7 +363,7 @@ export const AdCopyGeneratorView: React.FC<AdCopyGeneratorViewProps> = ({
                     )}
                   </div>
 
-                  <div className="mt-auto pt-4 border-t border-[#464554] flex justify-between items-center">
+                  <div className="mt-auto pt-3 border-t border-[#464554] flex justify-between items-center">
                     <div className="flex gap-1.5">
                       {[1, 2, 3, 4].map((dot) => (
                         <span
@@ -357,20 +388,20 @@ export const AdCopyGeneratorView: React.FC<AdCopyGeneratorViewProps> = ({
       </section>
 
       {/* Contextual FABs */}
-      <div className="fixed bottom-6 right-6 flex flex-col items-end gap-3 z-40">
+      <div className="fixed bottom-16 sm:bottom-6 right-4 sm:right-6 flex flex-col items-end gap-2.5 z-30">
         <button
           onClick={() => alert('Viewing copy generation history...')}
-          className="w-12 h-12 bg-[#353437] border border-[#464554] rounded-full flex items-center justify-center text-[#e5e1e4] shadow-2xl hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          className="w-10 h-10 sm:w-12 sm:h-12 bg-[#353437] border border-[#464554] rounded-full flex items-center justify-center text-[#e5e1e4] shadow-2xl hover:scale-105 active:scale-95 transition-all cursor-pointer"
           title="History Log"
         >
-          <span className="material-symbols-outlined text-[20px]">history</span>
+          <span className="material-symbols-outlined text-[18px] sm:text-[20px]">history</span>
         </button>
         <button
           onClick={handleGenerate}
-          className="w-12 h-12 bg-[#c0c1ff] text-[#1000a9] rounded-full flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all group cursor-pointer"
+          className="w-10 h-10 sm:w-12 sm:h-12 bg-[#c0c1ff] text-[#1000a9] rounded-full flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all group cursor-pointer"
           title="AI Co-pilot"
         >
-          <span className="material-symbols-filled group-hover:rotate-45 transition-transform text-[22px]">
+          <span className="material-symbols-filled group-hover:rotate-45 transition-transform text-[20px] sm:text-[22px]">
             smart_toy
           </span>
         </button>

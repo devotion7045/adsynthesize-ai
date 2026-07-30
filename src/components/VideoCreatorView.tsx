@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { VideoSlide } from '../types';
 
 export const VideoCreatorView: React.FC = () => {
+  const [mobileTab, setMobileTab] = useState<'player' | 'setup'>('player');
   const [brandIdentity, setBrandIdentity] = useState('Luminar Pro');
   const [hooks, setHooks] = useState<string[]>([
     'Unlock your creative peak.',
@@ -73,10 +74,38 @@ export const VideoCreatorView: React.FC = () => {
   const currentSlide = slides[activeSlideIndex] || slides[0];
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row overflow-hidden w-full h-[calc(100vh-64px)]">
+    <div className="flex-1 flex flex-col md:flex-row overflow-hidden w-full pb-20 md:pb-0 h-auto md:h-[calc(100vh-64px)]">
+      {/* Mobile Segmented View Control */}
+      <div className="md:hidden flex p-1 bg-[#201f22] border-b border-[#464554] shrink-0 mx-3 mt-3 rounded-xl">
+        <button
+          onClick={() => setMobileTab('player')}
+          className={`flex-1 py-2 font-mono text-xs rounded-lg font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            mobileTab === 'player'
+              ? 'bg-[#c0c1ff] text-[#1000a9] shadow'
+              : 'text-[#c7c4d7] hover:text-[#e5e1e4]'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[18px]">auto_videocam</span>
+          <span>Video & Timeline</span>
+        </button>
+        <button
+          onClick={() => setMobileTab('setup')}
+          className={`flex-1 py-2 font-mono text-xs rounded-lg font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            mobileTab === 'setup'
+              ? 'bg-[#c0c1ff] text-[#1000a9] shadow'
+              : 'text-[#c7c4d7] hover:text-[#e5e1e4]'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[18px]">tune</span>
+          <span>Sequence Setup</span>
+        </button>
+      </div>
+
       {/* Left Panel: Sequence Setup Inputs */}
-      <aside className="w-full md:w-[320px] shrink-0 border-r border-[#464554]/60 flex flex-col bg-[#0e0e10] p-6 overflow-y-auto custom-scrollbar">
-        <h2 className="text-xl font-bold mb-6 text-[#e5e1e4]">Sequence Setup</h2>
+      <aside className={`w-full md:w-[320px] shrink-0 border-r border-[#464554]/60 flex flex-col bg-[#0e0e10] p-4 sm:p-6 overflow-y-auto custom-scrollbar ${
+        mobileTab === 'setup' ? 'block' : 'hidden md:block'
+      }`}>
+        <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6 text-[#e5e1e4]">Sequence Setup</h2>
 
         <div className="space-y-6">
           {/* Brand Identity */}
@@ -177,9 +206,11 @@ export const VideoCreatorView: React.FC = () => {
       </aside>
 
       {/* Main Content Area: Canvas + Timeline */}
-      <div className="flex-1 flex flex-col relative bg-[#1c1b1d] overflow-hidden">
+      <div className={`flex-1 flex flex-col relative bg-[#1c1b1d] overflow-hidden ${
+        mobileTab === 'player' ? 'block' : 'hidden md:block'
+      }`}>
         {/* Canvas Preview Frame */}
-        <div className="flex-1 flex items-center justify-center p-6 sm:p-8 relative overflow-hidden">
+        <div className="flex-1 flex items-center justify-center p-3 sm:p-8 relative overflow-hidden min-h-[280px]">
           <div className="w-full max-w-4xl aspect-video bg-[#131315] rounded-xl border border-[#464554] shadow-2xl relative overflow-hidden flex flex-col">
             <div className="absolute inset-0">
               <img
@@ -189,32 +220,32 @@ export const VideoCreatorView: React.FC = () => {
               />
             </div>
 
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex flex-col items-center justify-center text-center p-8 sm:p-12">
-              <div className="text-[#c0c1ff] font-mono text-xs tracking-widest mb-4 uppercase font-semibold">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex flex-col items-center justify-center text-center p-4 sm:p-12">
+              <div className="text-[#c0c1ff] font-mono text-[10px] sm:text-xs tracking-widest mb-2 sm:mb-4 uppercase font-semibold">
                 {brandIdentity}
               </div>
-              <h1 className="text-[#e5e1e4] font-bold text-3xl sm:text-5xl mb-6 leading-tight max-w-3xl transition-all">
+              <h1 className="text-[#e5e1e4] font-bold text-xl sm:text-4xl md:text-5xl mb-4 sm:mb-6 leading-tight max-w-3xl transition-all px-2">
                 {currentSlide.hookText}
               </h1>
-              <button className="bg-[#4edea3] text-[#003824] px-8 py-3 rounded-full font-mono text-xs font-bold shadow-xl hover:scale-105 transition-transform">
+              <button className="bg-[#4edea3] text-[#003824] px-5 sm:px-8 py-2 sm:py-3 rounded-full font-mono text-[11px] sm:text-xs font-bold shadow-xl hover:scale-105 transition-transform">
                 {ctaText}
               </button>
             </div>
 
             {/* Video Playback Controls */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-6 bg-[#131315]/80 backdrop-blur-md px-6 py-2 rounded-full border border-[#464554]">
+            <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-4 sm:gap-6 bg-[#131315]/80 backdrop-blur-md px-4 sm:px-6 py-1.5 sm:py-2 rounded-full border border-[#464554]">
               <button
                 onClick={() => setActiveSlideIndex((prev) => (prev > 0 ? prev - 1 : slides.length - 1))}
                 className="text-[#e5e1e4] hover:text-[#c0c1ff] transition-colors cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[22px]">skip_previous</span>
+                <span className="material-symbols-outlined text-[18px] sm:text-[22px]">skip_previous</span>
               </button>
 
               <button
                 onClick={() => setIsPlaying(!isPlaying)}
-                className="w-10 h-10 bg-[#c0c1ff] text-[#1000a9] rounded-full flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
+                className="w-8 h-8 sm:w-10 sm:h-10 bg-[#c0c1ff] text-[#1000a9] rounded-full flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
               >
-                <span className="material-symbols-filled text-[22px]">
+                <span className="material-symbols-filled text-[18px] sm:text-[22px]">
                   {isPlaying ? 'pause' : 'play_arrow'}
                 </span>
               </button>
@@ -223,20 +254,20 @@ export const VideoCreatorView: React.FC = () => {
                 onClick={() => setActiveSlideIndex((prev) => (prev + 1) % slides.length)}
                 className="text-[#e5e1e4] hover:text-[#c0c1ff] transition-colors cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[22px]">skip_next</span>
+                <span className="material-symbols-outlined text-[18px] sm:text-[22px]">skip_next</span>
               </button>
             </div>
           </div>
         </div>
 
         {/* Bottom Section: Timeline Preview */}
-        <div className="h-[220px] bg-[#201f22] p-4 sm:p-6 border-t border-[#464554]/60 flex flex-col gap-3">
+        <div className="h-[200px] sm:h-[220px] bg-[#201f22] p-3 sm:p-6 border-t border-[#464554]/60 flex flex-col gap-2 sm:gap-3">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               <span className="font-mono text-xs font-bold text-[#e5e1e4]">Storyline</span>
               <div className="h-3.5 w-px bg-[#464554]"></div>
-              <span className="text-[#c7c4d7] font-mono text-[11px] uppercase tracking-wider">
-                {slides.length} SLIDES • {(slides.length * slideDuration).toFixed(1)}S TOTAL
+              <span className="text-[#c7c4d7] font-mono text-[10px] sm:text-[11px] uppercase tracking-wider">
+                {slides.length} SLIDES • {(slides.length * slideDuration).toFixed(1)}S
               </span>
             </div>
             <div className="flex gap-2">
@@ -250,18 +281,18 @@ export const VideoCreatorView: React.FC = () => {
           </div>
 
           {/* Timeline Scroller */}
-          <div className="flex-1 flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
+          <div className="flex-1 flex gap-3 sm:gap-4 overflow-x-auto pb-2 custom-scrollbar">
             {slides.map((slide, idx) => {
               const isActive = activeSlideIndex === idx;
               return (
                 <div
                   key={slide.id}
                   onClick={() => setActiveSlideIndex(idx)}
-                  className="w-60 h-full shrink-0 group relative cursor-pointer"
+                  className="w-48 sm:w-60 h-full shrink-0 group relative cursor-pointer"
                 >
                   {isActive && <div className="absolute -top-1 left-0 w-full h-[2px] bg-[#8083ff]" />}
                   <div
-                    className={`w-full h-28 rounded-lg border relative overflow-hidden transition-all ${
+                    className={`w-full h-22 sm:h-28 rounded-lg border relative overflow-hidden transition-all ${
                       isActive
                         ? 'border-[#8083ff] shadow-lg'
                         : 'border-[#464554] opacity-70 group-hover:opacity-100'
@@ -273,11 +304,11 @@ export const VideoCreatorView: React.FC = () => {
                       className="w-full h-full object-cover"
                     />
                     {isActive && <div className="absolute inset-0 bg-[#8083ff]/20" />}
-                    <div className="absolute bottom-2 left-2 bg-black/70 px-2 py-0.5 rounded text-[10px] font-mono text-white">
+                    <div className="absolute bottom-1.5 left-1.5 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-mono text-white">
                       {slide.timestamp}
                     </div>
                   </div>
-                  <div className="mt-1.5 text-[#e5e1e4] font-mono text-[11px] truncate">
+                  <div className="mt-1 text-[#e5e1e4] font-mono text-[10px] sm:text-[11px] truncate">
                     {slide.title}
                   </div>
                 </div>
@@ -298,9 +329,9 @@ export const VideoCreatorView: React.FC = () => {
                 };
                 setSlides([...slides, newSlide]);
               }}
-              className="w-16 h-28 shrink-0 border-2 border-dashed border-[#464554] rounded-lg flex flex-col items-center justify-center gap-1 text-[#908fa0] hover:text-[#e5e1e4] hover:border-[#908fa0] transition-all cursor-pointer"
+              className="w-14 sm:w-16 h-22 sm:h-28 shrink-0 border-2 border-dashed border-[#464554] rounded-lg flex flex-col items-center justify-center gap-1 text-[#908fa0] hover:text-[#e5e1e4] hover:border-[#908fa0] transition-all cursor-pointer"
             >
-              <span className="material-symbols-outlined">add</span>
+              <span className="material-symbols-outlined text-[18px]">add</span>
               <span className="text-[9px] font-mono uppercase">Add</span>
             </button>
           </div>
@@ -308,16 +339,16 @@ export const VideoCreatorView: React.FC = () => {
       </div>
 
       {/* Floating Status Pill */}
-      <div className="fixed bottom-6 right-6 flex items-center gap-3 z-30">
-        <div className="glass-panel px-3.5 py-1.5 rounded-full flex items-center gap-2">
+      <div className="fixed bottom-16 sm:bottom-6 right-4 sm:right-6 flex items-center gap-2 sm:gap-3 z-30">
+        <div className="glass-panel px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#4edea3] animate-pulse"></div>
-          <span className="font-mono text-[11px] uppercase text-[#c7c4d7]">Rendering Real-time Preview</span>
+          <span className="font-mono text-[10px] sm:text-[11px] uppercase text-[#c7c4d7]">Real-time Motion Engine</span>
         </div>
         <button
           onClick={() => alert('Opening video export settings...')}
-          className="w-11 h-11 bg-[#c0c1ff] text-[#1000a9] rounded-xl flex items-center justify-center shadow-lg hover:rotate-90 transition-all duration-500 cursor-pointer"
+          className="w-9 h-9 sm:w-11 sm:h-11 bg-[#c0c1ff] text-[#1000a9] rounded-xl flex items-center justify-center shadow-lg hover:rotate-90 transition-all duration-500 cursor-pointer shrink-0"
         >
-          <span className="material-symbols-outlined text-[20px]">settings</span>
+          <span className="material-symbols-outlined text-[18px] sm:text-[20px]">settings</span>
         </button>
       </div>
     </div>

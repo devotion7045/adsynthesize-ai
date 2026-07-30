@@ -115,7 +115,7 @@ export const CompetitorAuditView: React.FC<CompetitorAuditViewProps> = ({
   };
 
   return (
-    <div className="pt-6 pb-12 px-4 sm:px-6 max-w-7xl mx-auto space-y-8">
+    <div className="pt-4 sm:pt-6 pb-24 md:pb-12 px-3 sm:px-6 max-w-7xl mx-auto space-y-6 sm:space-y-8">
       {/* Header Section */}
       <section className="space-y-2">
         <h1 className="text-2xl sm:text-3xl font-bold text-[#e5e1e4] tracking-tight">
@@ -226,21 +226,95 @@ export const CompetitorAuditView: React.FC<CompetitorAuditViewProps> = ({
         </div>
       </section>
 
-      {/* Results Table / Identified Ads */}
+      {/* Results Table / Identified Ads (Desktop Table + Mobile Cards) */}
       <section className="bg-[#201f22] border border-[#464554]/60 rounded-xl overflow-hidden shadow-lg">
-        <div className="p-4 sm:p-6 border-b border-[#464554]/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <h2 className="text-xl font-bold text-[#e5e1e4]">Identified Competitor Ads</h2>
-          <div className="flex gap-2 self-end sm:self-auto">
+        <div className="p-4 sm:p-6 border-b border-[#464554]/60 flex justify-between items-center gap-3">
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold text-[#e5e1e4]">Identified Competitor Ads</h2>
+            <p className="font-mono text-xs text-[#908fa0] mt-0.5">
+              Found {auditResult.identifiedAds.length} high-performing ads in current niche
+            </p>
+          </div>
+          <div className="flex gap-2">
             <button className="p-2 border border-[#464554] rounded hover:bg-[#353437] text-[#c7c4d7] hover:text-[#e5e1e4] transition-colors cursor-pointer" title="Filter Ads">
-              <span className="material-symbols-outlined text-[20px]">filter_list</span>
+              <span className="material-symbols-outlined text-[18px]">filter_list</span>
             </button>
             <button className="p-2 border border-[#464554] rounded hover:bg-[#353437] text-[#c7c4d7] hover:text-[#e5e1e4] transition-colors cursor-pointer" title="Download Report">
-              <span className="material-symbols-outlined text-[20px]">download</span>
+              <span className="material-symbols-outlined text-[18px]">download</span>
             </button>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile View: Clean Responsive Cards */}
+        <div className="md:hidden divide-y divide-[#464554]/40 p-3 space-y-3">
+          {auditResult.identifiedAds.map((ad) => (
+            <div
+              key={ad.id}
+              onClick={() => setSelectedAdForModal(ad)}
+              className="bg-[#1c1b1d] border border-[#464554]/60 rounded-lg p-3.5 space-y-3 cursor-pointer hover:border-[#8083ff]/50 transition-all active:bg-[#2a2a2c]"
+            >
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-7 h-7 rounded border border-[#464554] flex items-center justify-center font-mono font-bold text-xs ${
+                    ad.logoColor === 'primary' ? 'bg-[#353437] text-[#c0c1ff]' :
+                    ad.logoColor === 'tertiary' ? 'bg-[#353437] text-[#ffb95f]' :
+                    'bg-[#353437] text-[#4edea3]'
+                  }`}>
+                    {ad.logoLetter}
+                  </div>
+                  <span className="font-semibold text-sm text-[#e5e1e4]">
+                    {ad.competitor}
+                  </span>
+                </div>
+                <span className={`font-mono text-xs px-2 py-0.5 rounded font-semibold bg-[#0e0e10] border border-[#464554] ${
+                  ad.ctrValue >= 3 ? 'text-[#4edea3]' : 'text-[#c7c4d7]'
+                }`}>
+                  CTR: {ad.estCtr}
+                </span>
+              </div>
+
+              <div className="flex gap-3 items-center">
+                <div className="w-20 h-14 bg-[#0e0e10] rounded border border-[#464554] overflow-hidden shrink-0">
+                  <img
+                    src={ad.adPreviewUrl}
+                    alt={ad.adPreviewAlt}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 space-y-1">
+                  <p className="text-xs text-[#e5e1e4] font-medium line-clamp-2">
+                    {ad.headline}
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {ad.platforms.map((plat) => (
+                      <span
+                        key={plat}
+                        className="px-1.5 py-0.2 bg-[#0e0e10] rounded font-mono text-[10px] text-[#c7c4d7]"
+                      >
+                        {plat}
+                      </span>
+                    ))}
+                    <span className="font-mono text-[10px] text-[#908fa0] ml-auto">
+                      {ad.runTime}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center pt-2 border-t border-[#464554]/40">
+                <span className="font-mono text-[11px] text-[#4edea3]">
+                  {ad.estimatedSpend}
+                </span>
+                <span className="font-mono text-xs text-[#c0c1ff] flex items-center gap-1 font-semibold">
+                  Strategy Details <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop View: Full Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[#2a2a2c] border-b border-[#464554]/60">

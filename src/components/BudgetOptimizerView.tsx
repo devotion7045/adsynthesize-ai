@@ -118,11 +118,11 @@ export const BudgetOptimizerView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 space-y-8">
+    <div className="max-w-[1400px] mx-auto px-3 sm:px-6 py-4 sm:py-8 pb-24 md:pb-8 space-y-6 sm:space-y-8">
       {/* Header Controls */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-2">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full md:w-auto">
-          <div className="flex flex-col gap-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 sm:gap-6 mb-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full md:w-auto">
+          <div className="flex flex-col gap-1.5 sm:gap-2">
             <label className="font-mono text-xs text-[#c7c4d7] font-semibold uppercase">
               DAILY BUDGET (USD)
             </label>
@@ -139,7 +139,7 @@ export const BudgetOptimizerView: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5 sm:gap-2">
             <label className="font-mono text-xs text-[#c7c4d7] font-semibold uppercase">
               TARGET ROAS
             </label>
@@ -179,59 +179,59 @@ export const BudgetOptimizerView: React.FC = () => {
         </button>
       </div>
 
-      {/* KPI Metrics Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-[#201f22] border border-[#464554]/60 p-5 rounded-xl space-y-2">
-          <div className="font-mono text-xs text-[#c7c4d7] uppercase font-semibold">
+      {/* KPI Metrics Summary (2x2 Grid on Mobile, 4 Col on Desktop) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-[#201f22] border border-[#464554]/60 p-3.5 sm:p-5 rounded-xl space-y-1 sm:space-y-2">
+          <div className="font-mono text-[10px] sm:text-xs text-[#c7c4d7] uppercase font-semibold">
             PROJECTED REVENUE
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-bold text-[#e5e1e4]">
-              ${data.projectedRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+          <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+            <span className="text-xl sm:text-3xl font-bold text-[#e5e1e4]">
+              ${data.projectedRevenue.toLocaleString('en-US', { minimumFractionDigits: 0 })}
             </span>
-            <span className="font-mono text-xs text-[#4edea3] flex items-center font-bold">
-              <span className="material-symbols-outlined text-[14px]">trending_up</span>
+            <span className="font-mono text-[11px] sm:text-xs text-[#4edea3] flex items-center font-bold">
+              <span className="material-symbols-outlined text-[12px] sm:text-[14px]">trending_up</span>
               {data.momRevenueGrowth}%
             </span>
           </div>
         </div>
 
-        <div className="bg-[#201f22] border border-[#464554]/60 p-5 rounded-xl space-y-2">
-          <div className="font-mono text-xs text-[#c7c4d7] uppercase font-semibold">
+        <div className="bg-[#201f22] border border-[#464554]/60 p-3.5 sm:p-5 rounded-xl space-y-1 sm:space-y-2">
+          <div className="font-mono text-[10px] sm:text-xs text-[#c7c4d7] uppercase font-semibold">
             AVG. CPC
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-bold text-[#e5e1e4]">
+          <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+            <span className="text-xl sm:text-3xl font-bold text-[#e5e1e4]">
               ${data.avgCpc.toFixed(2)}
             </span>
-            <span className="font-mono text-xs text-[#4edea3] flex items-center font-bold">
-              <span className="material-symbols-outlined text-[14px]">trending_down</span>
+            <span className="font-mono text-[11px] sm:text-xs text-[#4edea3] flex items-center font-bold">
+              <span className="material-symbols-outlined text-[12px] sm:text-[14px]">trending_down</span>
               {data.momCpcChange}%
             </span>
           </div>
         </div>
 
-        <div className="bg-[#201f22] border border-[#464554]/60 p-5 rounded-xl space-y-2">
-          <div className="font-mono text-xs text-[#c7c4d7] uppercase font-semibold">
+        <div className="bg-[#201f22] border border-[#464554]/60 p-3.5 sm:p-5 rounded-xl space-y-1 sm:space-y-2">
+          <div className="font-mono text-[10px] sm:text-xs text-[#c7c4d7] uppercase font-semibold">
             CONVERSIONS
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-bold text-[#e5e1e4]">
+          <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+            <span className="text-xl sm:text-3xl font-bold text-[#e5e1e4]">
               {data.conversions.toLocaleString()}
             </span>
-            <span className="font-mono text-xs text-[#4edea3] flex items-center font-bold">
-              <span className="material-symbols-outlined text-[14px]">trending_up</span>
+            <span className="font-mono text-[11px] sm:text-xs text-[#4edea3] flex items-center font-bold">
+              <span className="material-symbols-outlined text-[12px] sm:text-[14px]">trending_up</span>
               {data.momConversionGrowth}%
             </span>
           </div>
         </div>
 
-        <div className="bg-[#201f22] border border-[#464554]/60 p-5 rounded-xl space-y-2">
-          <div className="font-mono text-xs text-[#c7c4d7] uppercase font-semibold">
+        <div className="bg-[#201f22] border border-[#464554]/60 p-3.5 sm:p-5 rounded-xl space-y-1 sm:space-y-2">
+          <div className="font-mono text-[10px] sm:text-xs text-[#c7c4d7] uppercase font-semibold">
             AD SCORE
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-bold text-[#e5e1e4]">
+          <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+            <span className="text-xl sm:text-3xl font-bold text-[#e5e1e4]">
               {data.adScore}
             </span>
             <span className="font-mono text-xs text-[#c7c4d7]">/ 10</span>
@@ -239,7 +239,7 @@ export const BudgetOptimizerView: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Data Table Container */}
+      {/* Main Data Table Container (Mobile Cards + Desktop Table) */}
       <div className="bg-[#201f22] border border-[#464554]/60 rounded-xl overflow-hidden shadow-xl">
         <div className="p-4 border-b border-[#464554]/60 bg-[#2a2a2c] flex justify-between items-center">
           <h2 className="text-base sm:text-lg font-semibold text-[#e5e1e4]">
@@ -247,15 +247,63 @@ export const BudgetOptimizerView: React.FC = () => {
           </h2>
           <div className="flex gap-2">
             <button className="p-1.5 text-[#c7c4d7] hover:text-[#e5e1e4] transition-colors cursor-pointer">
-              <span className="material-symbols-outlined text-[20px]">filter_list</span>
+              <span className="material-symbols-outlined text-[18px] sm:text-[20px]">filter_list</span>
             </button>
             <button className="p-1.5 text-[#c7c4d7] hover:text-[#e5e1e4] transition-colors cursor-pointer">
-              <span className="material-symbols-outlined text-[20px]">download</span>
+              <span className="material-symbols-outlined text-[18px] sm:text-[20px]">download</span>
             </button>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile Responsive Cards */}
+        <div className="md:hidden divide-y divide-[#464554]/40 p-3 space-y-3">
+          {data.adSets.map((adSet) => (
+            <div
+              key={adSet.id}
+              className="bg-[#1c1b1d] border border-[#464554]/60 rounded-lg p-3.5 space-y-2.5"
+            >
+              <div className="flex justify-between items-start gap-2">
+                <div>
+                  <h4 className="text-xs font-semibold text-[#e5e1e4] truncate max-w-[200px]">
+                    {adSet.name}
+                  </h4>
+                  <span className="text-[#908fa0] text-[10px] font-mono block">
+                    {adSet.code}
+                  </span>
+                </div>
+                <span className={`material-symbols-outlined text-[18px] ${adSet.trendColor}`}>
+                  trending_up
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 bg-[#0e0e10] p-2.5 rounded border border-[#464554]/40 font-mono text-[11px]">
+                <div>
+                  <span className="text-[#908fa0] block text-[9px] uppercase">Spend</span>
+                  <span className="text-[#e5e1e4] font-bold">${adSet.spend.toLocaleString()}</span>
+                </div>
+                <div>
+                  <span className="text-[#908fa0] block text-[9px] uppercase">Clicks</span>
+                  <span className="text-[#e5e1e4]">{adSet.clicks.toLocaleString()}</span>
+                </div>
+                <div>
+                  <span className="text-[#908fa0] block text-[9px] uppercase">Conversions</span>
+                  <span className="text-[#e5e1e4]">{adSet.conversions}</span>
+                </div>
+                <div>
+                  <span className="text-[#908fa0] block text-[9px] uppercase">Conv. Value</span>
+                  <span className={`font-bold ${
+                    adSet.convValue > 2000 ? 'text-[#4edea3]' : 'text-[#e5e1e4]'
+                  }`}>
+                    ${adSet.convValue.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-[#464554]/60 bg-[#1c1b1d]">
@@ -325,7 +373,7 @@ export const BudgetOptimizerView: React.FC = () => {
                   <td className="px-6 py-4">
                     <div className="flex justify-center">
                       <span className={`material-symbols-outlined text-[20px] ${adSet.trendColor}`}>
-                        redeem
+                        trending_up
                       </span>
                     </div>
                   </td>

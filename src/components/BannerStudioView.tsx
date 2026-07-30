@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BannerConfig } from '../types';
 
 export const BannerStudioView: React.FC = () => {
+  const [mobileTab, setMobileTab] = useState<'preview' | 'controls'>('preview');
   const [config, setConfig] = useState<BannerConfig>({
     headline: 'Synthesize Future',
     subheadline: 'Scale your high-performance ad creative with production-grade AI.',
@@ -14,11 +15,13 @@ export const BannerStudioView: React.FC = () => {
     bgStyle: 'gradient',
   });
 
-  const [zoomLevel, setZoomLevel] = useState(85);
+  const [zoomLevel, setZoomLevel] = useState(80);
   const [isGenerating, setIsGenerating] = useState(false);
   const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only apply 3D tilt on desktop hover
+    if (window.innerWidth < 768) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -45,10 +48,38 @@ export const BannerStudioView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row overflow-hidden w-full h-[calc(100vh-64px)]">
+    <div className="flex-1 flex flex-col md:flex-row overflow-hidden w-full pb-20 md:pb-0 h-auto md:h-[calc(100vh-64px)]">
+      {/* Mobile Segmented View Control */}
+      <div className="md:hidden flex p-1 bg-[#201f22] border-b border-[#464554] shrink-0 mx-3 mt-3 rounded-xl">
+        <button
+          onClick={() => setMobileTab('preview')}
+          className={`flex-1 py-2 font-mono text-xs rounded-lg font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            mobileTab === 'preview'
+              ? 'bg-[#c0c1ff] text-[#1000a9] shadow'
+              : 'text-[#c7c4d7] hover:text-[#e5e1e4]'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[18px]">aspect_ratio</span>
+          <span>Canvas Preview</span>
+        </button>
+        <button
+          onClick={() => setMobileTab('controls')}
+          className={`flex-1 py-2 font-mono text-xs rounded-lg font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            mobileTab === 'controls'
+              ? 'bg-[#c0c1ff] text-[#1000a9] shadow'
+              : 'text-[#c7c4d7] hover:text-[#e5e1e4]'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[18px]">tune</span>
+          <span>Edit Banner</span>
+        </button>
+      </div>
+
       {/* Left Panel: Controls */}
-      <aside className="w-full md:w-[340px] shrink-0 bg-[#131315] border-r border-[#464554]/60 flex flex-col h-full overflow-y-auto">
-        <div className="p-6 space-y-8">
+      <aside className={`w-full md:w-[340px] shrink-0 bg-[#131315] border-r border-[#464554]/60 flex flex-col h-full overflow-y-auto ${
+        mobileTab === 'controls' ? 'block' : 'hidden md:block'
+      }`}>
+        <div className="p-4 sm:p-6 space-y-6 sm:space-y-8">
           {/* Content Strategy */}
           <div>
             <h2 className="font-mono text-xs text-[#908fa0] mb-4 flex items-center gap-2 font-bold uppercase tracking-wider">
@@ -184,9 +215,11 @@ export const BannerStudioView: React.FC = () => {
       </aside>
 
       {/* Right Panel: Preview Canvas */}
-      <section className="flex-1 bg-[#131315] relative flex flex-col overflow-hidden h-full">
+      <section className={`flex-1 bg-[#131315] relative flex flex-col overflow-hidden h-full ${
+        mobileTab === 'preview' ? 'block' : 'hidden md:block'
+      }`}>
         {/* Canvas Toolbar */}
-        <div className="h-14 border-b border-[#464554]/60 px-6 flex items-center justify-between bg-[#1c1b1d]/80 backdrop-blur-md z-20">
+        <div className="h-12 sm:h-14 border-b border-[#464554]/60 px-4 sm:px-6 flex items-center justify-between bg-[#1c1b1d]/80 backdrop-blur-md z-20">
           <div className="flex items-center gap-3">
             <span className="font-mono text-xs text-[#908fa0] flex items-center gap-2">
               PREVIEW CANVAS
@@ -197,44 +230,45 @@ export const BannerStudioView: React.FC = () => {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setZoomLevel((z) => Math.max(50, z - 10))}
-              className="p-2 hover:bg-[#353437] rounded-lg text-[#c7c4d7] cursor-pointer"
+              onClick={() => setZoomLevel((z) => Math.max(40, z - 10))}
+              className="p-1.5 hover:bg-[#353437] rounded-lg text-[#c7c4d7] cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[20px]">zoom_out</span>
+              <span className="material-symbols-outlined text-[18px] sm:text-[20px]">zoom_out</span>
             </button>
-            <span className="font-mono text-xs text-[#c7c4d7] w-12 text-center">
+            <span className="font-mono text-xs text-[#c7c4d7] w-10 sm:w-12 text-center">
               {zoomLevel}%
             </span>
             <button
-              onClick={() => setZoomLevel((z) => Math.min(130, z + 10))}
-              className="p-2 hover:bg-[#353437] rounded-lg text-[#c7c4d7] cursor-pointer"
+              onClick={() => setZoomLevel((z) => Math.min(120, z + 10))}
+              className="p-1.5 hover:bg-[#353437] rounded-lg text-[#c7c4d7] cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[20px]">zoom_in</span>
+              <span className="material-symbols-outlined text-[18px] sm:text-[20px]">zoom_in</span>
             </button>
             <div className="w-px h-4 bg-[#464554] mx-1"></div>
             <button
               onClick={handleDownloadBanner}
-              className="p-2 hover:bg-[#353437] rounded-lg text-[#c7c4d7] cursor-pointer"
+              className="p-1.5 hover:bg-[#353437] rounded-lg text-[#c7c4d7] cursor-pointer"
               title="Export Banner"
             >
-              <span className="material-symbols-outlined text-[20px]">file_download</span>
+              <span className="material-symbols-outlined text-[18px] sm:text-[20px]">file_download</span>
             </button>
           </div>
         </div>
 
         {/* Preview Canvas Area */}
-        <div className="flex-1 preview-canvas flex items-center justify-center p-8 sm:p-12 overflow-auto custom-scrollbar">
+        <div className="flex-1 preview-canvas flex items-center justify-center p-4 sm:p-12 overflow-auto custom-scrollbar min-h-[460px]">
           <div
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{
-              width: config.aspectRatio === '1:1' ? '480px' : '340px',
-              height: config.aspectRatio === '1:1' ? '480px' : '580px',
+              width: config.aspectRatio === '1:1' ? '420px' : '310px',
+              height: config.aspectRatio === '1:1' ? '420px' : '520px',
+              maxWidth: '100%',
               backgroundColor: config.brandHex,
               transform: `perspective(1000px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) scale(${zoomLevel / 100})`,
               transition: 'width 0.4s ease, height 0.4s ease, transform 0.1s ease-out',
             }}
-            className="relative rounded-xl overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.6)] border border-[#464554]/40 flex flex-col justify-between p-8 sm:p-10 shrink-0"
+            className="relative rounded-xl overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.6)] border border-[#464554]/40 flex flex-col justify-between p-6 sm:p-10 shrink-0"
           >
             {/* Dynamic Ambient Background Glow */}
             <div
