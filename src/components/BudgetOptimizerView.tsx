@@ -80,6 +80,15 @@ export const BudgetOptimizerView: React.FC = () => {
     conversions: 842,
     momConversionGrowth: 8.1,
     adScore: 9.2,
+    strategicSummary: '',
+    recommendations: [] as Array<{
+      ad_set_id?: string;
+      ad_set_name?: string;
+      action?: string;
+      current_spend?: number;
+      recommended_daily_budget?: number;
+      reasoning?: string;
+    }>,
     adSets: INITIAL_AD_SETS,
   });
 
@@ -109,6 +118,10 @@ export const BudgetOptimizerView: React.FC = () => {
       });
       const json = await res.json();
       if (json.success && json.data) {
+        const rd = json.data.remoteData || json.data;
+        const recs = rd.recommendations || json.data.recommendations || [];
+        const summary = rd.strategic_summary || json.data.strategic_summary || json.data.recommendation_summary || '';
+
         setData((prev) => ({
           ...prev,
           projectedRevenue:
@@ -130,6 +143,8 @@ export const BudgetOptimizerView: React.FC = () => {
             json.data.adScore ||
             json.data.newAdScore ||
             9.6,
+          strategicSummary: summary,
+          recommendations: recs,
         }));
       }
     } catch (e) {
@@ -262,6 +277,62 @@ export const BudgetOptimizerView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Strategic Summary & AI Recommendations */}
+      {(data.strategicSummary || (data.recommendations && data.recommendations.length > 0)) && (
+        <section className="bg-[#201f22] border border-[#464554]/60 rounded-xl p-5 sm:p-6 space-y-4 shadow-lg">
+          <div className="flex items-center justify-between border-b border-[#464554]/40 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#8083ff]">auto_graph</span>
+              <h3 className="text-base font-bold text-[#e5e1e4]">Live AI Optimization Strategy</h3>
+            </div>
+            <span className="font-mono text-[11px] text-[#4edea3] bg-[#00a572]/15 px-2.5 py-1 rounded border border-[#4edea3]/30">
+              Live Backend
+            </span>
+          </div>
+
+          {data.strategicSummary && (
+            <p className="text-sm text-[#c7c4d7] leading-relaxed">
+              {data.strategicSummary}
+            </p>
+          )}
+
+          {data.recommendations && data.recommendations.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              {data.recommendations.map((rec, i) => {
+                const actionColor =
+                  rec.action === 'SCALE'
+                    ? 'text-[#4edea3] bg-[#4edea3]/10 border-[#4edea3]/40'
+                    : rec.action === 'REDUCE'
+                    ? 'text-[#ffb95f] bg-[#ffb95f]/10 border-[#ffb95f]/40'
+                    : 'text-[#ffb4ab] bg-[#ffb4ab]/10 border-[#ffb4ab]/40';
+                return (
+                  <div key={i} className="bg-[#141315] border border-[#464554]/50 p-4 rounded-lg space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs text-[#e5e1e4] truncate max-w-[180px]">
+                        {rec.ad_set_name || rec.ad_set_id || `Ad Set ${i + 1}`}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold border ${actionColor}`}>
+                        {rec.action || 'OPTIMIZE'}
+                      </span>
+                    </div>
+                    {rec.recommended_daily_budget !== undefined && (
+                      <div className="font-mono text-xs text-[#c7c4d7]">
+                        Rec. Budget: <span className="text-[#e5e1e4] font-bold">${rec.recommended_daily_budget}/day</span>
+                      </div>
+                    )}
+                    {rec.reasoning && (
+                      <p className="text-xs text-[#908fa0] leading-normal line-clamp-3">
+                        {rec.reasoning}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Main Data Table Container (Mobile Cards + Desktop Table) */}
       <div className="bg-[#201f22] border border-[#464554]/60 rounded-xl overflow-hidden shadow-xl">

@@ -36,6 +36,8 @@ export const BannerStudioView: React.FC = () => {
     setTilt({ rx: 0, ry: 0 });
   };
 
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
   const handleGenerateBanners = async () => {
     setIsGenerating(true);
     try {
@@ -63,6 +65,13 @@ export const BannerStudioView: React.FC = () => {
           badgeText: json.banner.badge_text || json.banner.badgeText || prev.badgeText,
           memberCount: json.banner.member_count || json.banner.memberCount || prev.memberCount,
         }));
+        const returnedImg =
+          json.banner.image_url ||
+          json.banner.imageUrl ||
+          json.banner.remoteData?.images?.[0]?.image_url;
+        if (returnedImg) {
+          setImageUrl(returnedImg);
+        }
       }
     } catch (e) {
       console.error('Error generating banner:', e);
@@ -298,6 +307,15 @@ export const BannerStudioView: React.FC = () => {
             }}
             className="relative rounded-xl overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.6)] border border-[#464554]/40 flex flex-col justify-between p-6 sm:p-10 shrink-0"
           >
+            {/* Generated API Background Image if present */}
+            {imageUrl && (
+              <img
+                src={imageUrl}
+                alt="AI Generated Banner"
+                className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none z-0"
+              />
+            )}
+
             {/* Dynamic Ambient Background Glow */}
             <div
               className="absolute bottom-0 right-0 w-72 h-72 blur-[120px] opacity-30 pointer-events-none"

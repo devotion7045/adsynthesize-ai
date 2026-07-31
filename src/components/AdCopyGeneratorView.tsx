@@ -23,6 +23,7 @@ export const AdCopyGeneratorView: React.FC<AdCopyGeneratorViewProps> = ({
   const [tone, setTone] = useState<'Professional' | 'Bold' | 'Witty' | 'High-Energy' | 'Direct'>('Professional');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [keyHooks, setKeyHooks] = useState<string[]>([]);
 
   const [variants, setVariants] = useState<AdCopyVariant[]>([
     {
@@ -74,6 +75,9 @@ export const AdCopyGeneratorView: React.FC<AdCopyGeneratorViewProps> = ({
       const json = await res.json();
       if (json.success && json.variants && json.variants.length > 0) {
         setVariants(json.variants);
+      }
+      if (json.key_hooks || json.remoteData?.key_hooks) {
+        setKeyHooks(json.key_hooks || json.remoteData?.key_hooks || []);
       }
     } catch (e) {
       console.error('Error generating copy:', e);
@@ -289,6 +293,25 @@ export const AdCopyGeneratorView: React.FC<AdCopyGeneratorViewProps> = ({
               </button>
             </div>
           </div>
+
+          {keyHooks && keyHooks.length > 0 && (
+            <div className="bg-[#201f22] border border-[#464554]/60 p-4 rounded-xl space-y-2">
+              <span className="font-mono text-xs text-[#4edea3] uppercase font-semibold flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[16px]">key</span>
+                Live API Key Hooks Extracted:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {keyHooks.map((hook, idx) => (
+                  <span
+                    key={idx}
+                    className="bg-[#1000a9]/40 border border-[#8083ff]/40 text-[#c0c1ff] px-3 py-1 rounded-full text-xs font-mono font-medium"
+                  >
+                    {hook}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Bento Grid Layout for Cards */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
