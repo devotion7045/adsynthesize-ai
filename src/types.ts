@@ -1,4 +1,5 @@
 export type TabType = 
+  | 'landing'
   | 'competitor-audit'
   | 'ad-copy-generator'
   | 'banner-studio'

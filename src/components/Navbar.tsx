@@ -7,7 +7,7 @@ interface NavbarProps {
   setActiveTab: (tab: TabType) => void;
   onOpenWorkspace: () => void;
   user: UserProfile | null;
-  onOpenAuth: () => void;
+  onOpenAuth: (mode?: 'login' | 'signup') => void;
   onSignOut: () => void;
 }
 
@@ -23,33 +23,34 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
   const tabs: { id: TabType; label: string; shortLabel: string; icon: string }[] = [
-    { id: 'competitor-audit', label: 'Competitor Audit', shortLabel: 'Audit', icon: 'analytics' },
-    { id: 'ad-copy-generator', label: 'Ad Copy Generator', shortLabel: 'Ad Copy', icon: 'auto_awesome' },
+    { id: 'landing', label: 'Home', shortLabel: 'Home', icon: 'home' },
+    { id: 'competitor-audit', label: 'Competitor Spy', shortLabel: 'Audit', icon: 'analytics' },
+    { id: 'ad-copy-generator', label: 'Ad Copy', shortLabel: 'Ad Copy', icon: 'auto_awesome' },
     { id: 'banner-studio', label: 'Banner Studio', shortLabel: 'Banner', icon: 'aspect_ratio' },
     { id: 'video-creator', label: 'Video Creator', shortLabel: 'Video', icon: 'auto_videocam' },
-    { id: 'budget-optimizer', label: 'Budget Optimizer', shortLabel: 'Budget', icon: 'database' },
+    { id: 'budget-optimizer', label: 'Budget Engine', shortLabel: 'Budget', icon: 'database' },
   ];
 
   return (
     <>
-      <header className="sticky top-0 left-0 right-0 z-50 bg-[#131315]/90 border-b border-[#464554]/40 backdrop-blur-md">
+      <header className="sticky top-0 left-0 right-0 z-50 bg-[#09090B]/90 border-b border-[#27272A] backdrop-blur-md">
         <nav className="flex justify-between items-center w-full px-3 sm:px-6 h-14 sm:h-16 max-w-full mx-auto">
           <div className="flex items-center gap-4 sm:gap-8">
             {/* Brand Logo */}
             <button 
-              onClick={() => setActiveTab('competitor-audit')} 
-              className="text-lg sm:text-xl font-bold text-[#e5e1e4] flex items-center gap-2 cursor-pointer focus:outline-none"
+              onClick={() => setActiveTab('landing')} 
+              className="text-lg sm:text-xl font-bold text-[#FFFFFF] flex items-center gap-2 cursor-pointer focus:outline-none group"
             >
-              <span className="material-symbols-filled text-[#c0c1ff] text-xl sm:text-2xl">dataset</span>
+              <span className="material-symbols-filled text-[#6366F1] text-xl sm:text-2xl group-hover:scale-110 transition-transform">dataset</span>
               <span className="tracking-tight">AdSynthesize AI</span>
-              <span className="hidden lg:inline-flex items-center gap-1 font-mono text-[10px] text-[#4edea3] bg-[#00a572]/15 px-2 py-0.5 rounded border border-[#4edea3]/30">
-                <span className="w-1.5 h-1.5 bg-[#4edea3] rounded-full animate-ping"></span>
+              <span className="hidden lg:inline-flex items-center gap-1 font-mono text-[10px] text-[#10B981] bg-[#10B981]/15 px-2 py-0.5 rounded border border-[#10B981]/30">
+                <span className="w-1.5 h-1.5 bg-[#10B981] rounded-full animate-ping"></span>
                 Render Live Backend
               </span>
             </button>
 
             {/* Desktop Nav Links */}
-            <div className="hidden md:flex gap-6 items-center h-16 pt-1">
+            <div className="hidden md:flex gap-5 lg:gap-6 items-center h-16 pt-1">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
@@ -58,8 +59,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onClick={() => setActiveTab(tab.id)}
                     className={`font-mono text-xs tracking-wider pb-4 transition-colors duration-200 cursor-pointer ${
                       isActive
-                        ? 'text-[#c0c1ff] border-b-2 border-[#c0c1ff] font-semibold'
-                        : 'text-[#c7c4d7] hover:text-[#c0c1ff]'
+                        ? 'text-[#6366F1] border-b-2 border-[#6366F1] font-semibold'
+                        : 'text-[#A1A1AA] hover:text-[#FFFFFF]'
                     }`}
                   >
                     {tab.label}
@@ -73,9 +74,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={onOpenWorkspace}
-              className="bg-[#201f22] border border-[#464554] hover:border-[#908fa0] px-2.5 sm:px-3 py-1.5 rounded-lg font-mono text-xs text-[#e5e1e4] hover:bg-[#353437] transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+              className="bg-[#18181B] border border-[#27272A] hover:border-[#A1A1AA] px-2.5 sm:px-3 py-1.5 rounded-lg font-mono text-xs text-[#FFFFFF] hover:bg-[#27272A] transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
             >
-              <span className="material-symbols-outlined text-[16px] text-[#c0c1ff]">folder_open</span>
+              <span className="material-symbols-outlined text-[16px] text-[#6366F1]">folder_open</span>
               <span className="hidden sm:inline">Workspace</span>
             </button>
 
@@ -84,25 +85,25 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 bg-[#201f22] border border-[#464554] hover:border-[#8083ff] px-2 py-1 rounded-lg cursor-pointer transition-all"
+                  className="flex items-center gap-2 bg-[#18181B] border border-[#27272A] hover:border-[#6366F1] px-2.5 py-1 rounded-lg cursor-pointer transition-all"
                 >
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#8083ff] text-[#1000a9] font-bold text-xs flex items-center justify-center shrink-0">
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#6366F1] text-[#FFFFFF] font-bold text-xs flex items-center justify-center shrink-0">
                     {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                   </div>
-                  <span className="hidden sm:inline text-xs font-mono font-medium text-[#e5e1e4] truncate max-w-[110px]">
+                  <span className="hidden sm:inline text-xs font-mono font-medium text-[#FFFFFF] truncate max-w-[110px]">
                     {user.name}
                   </span>
-                  <span className="material-symbols-outlined text-[16px] text-[#908fa0]">arrow_drop_down</span>
+                  <span className="material-symbols-outlined text-[16px] text-[#A1A1AA]">arrow_drop_down</span>
                 </button>
 
                 {/* User Dropdown */}
                 {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-[#1e1d21] border border-[#464554] rounded-xl shadow-2xl p-3 space-y-3 z-50 animate-fade-in">
-                    <div className="border-b border-[#464554]/60 pb-2">
-                      <div className="font-bold text-xs text-[#e5e1e4] truncate">{user.name}</div>
-                      <div className="font-mono text-[11px] text-[#908fa0] truncate">{user.email}</div>
-                      <div className="mt-1.5 inline-block font-mono text-[10px] text-[#4edea3] bg-[#00a572]/15 px-2 py-0.5 rounded border border-[#4edea3]/30">
-                        {user.plan || 'Pro Member'}
+                  <div className="absolute right-0 mt-2 w-56 bg-[#18181B] border border-[#27272A] rounded-xl shadow-2xl p-3 space-y-3 z-50 animate-fade-in">
+                    <div className="border-b border-[#27272A] pb-2">
+                      <div className="font-bold text-xs text-[#FFFFFF] truncate">{user.name}</div>
+                      <div className="font-mono text-[11px] text-[#A1A1AA] truncate">{user.email}</div>
+                      <div className="mt-1.5 inline-block font-mono text-[10px] text-[#10B981] bg-[#10B981]/15 px-2 py-0.5 rounded border border-[#10B981]/30">
+                        {user.plan || 'Pro Growth Member'}
                       </div>
                     </div>
 
@@ -111,7 +112,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         setProfileDropdownOpen(false);
                         onSignOut();
                       }}
-                      className="w-full text-left font-mono text-xs text-[#ffb4ab] hover:bg-[#201f22] p-2 rounded-lg transition-colors flex items-center gap-2 cursor-pointer"
+                      className="w-full text-left font-mono text-xs text-[#EF4444] hover:bg-[#27272A] p-2 rounded-lg transition-colors flex items-center gap-2 cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[16px]">logout</span>
                       <span>Sign Out</span>
@@ -122,10 +123,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             ) : (
               <div className="flex items-center gap-1.5">
                 <button
-                  onClick={onOpenAuth}
-                  className="bg-[#8083ff] text-[#1000a9] hover:bg-[#c0c1ff] px-3 py-1.5 rounded-lg font-mono text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                  onClick={() => onOpenAuth('login')}
+                  className="hidden sm:inline-block font-mono text-xs text-[#A1A1AA] hover:text-[#FFFFFF] px-2.5 py-1.5 cursor-pointer"
                 >
-                  Sign In / Register
+                  Log In
+                </button>
+                <button
+                  onClick={() => onOpenAuth('signup')}
+                  className="bg-[#6366F1] text-[#FFFFFF] hover:bg-[#4F46E5] px-3.5 py-1.5 rounded-lg font-mono text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                >
+                  Start Free Trial
                 </button>
               </div>
             )}
@@ -133,7 +140,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Mobile Hamburger Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-1 text-[#c7c4d7] hover:text-[#e5e1e4] focus:outline-none cursor-pointer"
+              className="md:hidden p-1 text-[#A1A1AA] hover:text-[#FFFFFF] focus:outline-none cursor-pointer"
               aria-label="Toggle menu"
             >
               <span className="material-symbols-outlined text-[22px]">
@@ -145,7 +152,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Mobile Drawer Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-[#131315] border-b border-[#464554] px-3 py-3 space-y-1.5">
+          <div className="md:hidden bg-[#09090B] border-b border-[#27272A] px-3 py-3 space-y-1.5">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -157,8 +164,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   }}
                   className={`w-full text-left py-2.5 px-3 rounded-lg font-mono text-xs transition-colors flex items-center justify-between ${
                     isActive
-                      ? 'bg-[#8083ff]/20 text-[#c0c1ff] font-semibold border-l-2 border-[#c0c1ff]'
-                      : 'text-[#c7c4d7] hover:bg-[#201f22]'
+                      ? 'bg-[#6366F1]/20 text-[#6366F1] font-semibold border-l-2 border-[#6366F1]'
+                      : 'text-[#A1A1AA] hover:bg-[#18181B]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -174,23 +181,23 @@ export const Navbar: React.FC<NavbarProps> = ({
       </header>
 
       {/* Mobile Sticky Bottom Tab Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#131315]/95 backdrop-blur-lg border-t border-[#464554]/60 px-1 py-1 flex justify-around items-center shadow-2xl">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#09090B]/95 backdrop-blur-lg border-t border-[#27272A] px-1 py-1 flex justify-around items-center shadow-2xl">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all ${
+              className={`flex flex-col items-center justify-center py-1 px-1.5 rounded-lg transition-all ${
                 isActive
-                  ? 'text-[#c0c1ff] font-bold scale-105'
-                  : 'text-[#908fa0] hover:text-[#c7c4d7]'
+                  ? 'text-[#6366F1] font-bold scale-105'
+                  : 'text-[#71717A] hover:text-[#A1A1AA]'
               }`}
             >
-              <span className={`material-symbols-outlined text-[20px] ${isActive ? 'text-[#c0c1ff]' : ''}`}>
+              <span className={`material-symbols-outlined text-[18px] ${isActive ? 'text-[#6366F1]' : ''}`}>
                 {tab.icon}
               </span>
-              <span className="font-mono text-[9px] mt-0.5 tracking-tight truncate max-w-[62px]">
+              <span className="font-mono text-[9px] mt-0.5 tracking-tight truncate max-w-[55px]">
                 {tab.shortLabel}
               </span>
             </button>
