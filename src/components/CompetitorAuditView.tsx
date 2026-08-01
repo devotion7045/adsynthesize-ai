@@ -67,18 +67,26 @@ export const CompetitorAuditView: React.FC<CompetitorAuditViewProps> = ({
   const [isAuditing, setIsAuditing] = useState(false);
   const [selectedAdForModal, setSelectedAdForModal] = useState<CompetitorAd | null>(null);
 
+  const [liveData, setLiveData] = useState<{
+    competitorNiche?: string;
+    valueProposition?: string;
+    highIntentKeywords?: Array<{ keyword: string; intent: string; estimated_competition: string }>;
+    recommendedAdAngles?: string[];
+    suggestedGoogleHeadlines?: string[];
+  }>({});
+
   const [auditResult, setAuditResult] = useState<CompetitorAuditResult>({
-    domainOrNiche: 'fintech.io',
-    competitors: ['NexusFlow AI', 'Vortex Media', 'Quantum Scale'],
-    adSpendEstimate: '$1.2M',
-    momChange: '+12.4%',
-    keywordOverlap: '64.2%',
+    domainOrNiche: 'E-commerce',
+    competitors: ['Klaviyo', 'Omnisend'],
+    adSpendEstimate: '$1.4M',
+    momChange: '+14.2%',
+    keywordOverlap: '68.5%',
     keywordCompetition: 'High Competition',
-    totalCreativeVolume: '412 Ads',
-    activeChannelsCount: 24,
+    totalCreativeVolume: '450 Ads',
+    activeChannelsCount: 28,
     identifiedAds: INITIAL_ADS,
     auditIntelligenceSummary:
-      'Our AI engine scans 50+ ad networks including Meta, Google, and TikTok to provide real-time creative volume and spend estimates.',
+      'Scanned ad networks across E-commerce for Klaviyo, Omnisend. Detected high video ad volume with Meta and LinkedIn dominance.',
   });
 
   const handleRunAudit = async () => {
@@ -88,7 +96,8 @@ export const CompetitorAuditView: React.FC<CompetitorAuditViewProps> = ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          domain_or_niche: domain,
+          target_domain_or_topic: domain,
+          target_audience: 'D2C Founders & Growth Buyers',
           competitors: competitorsInput.split(',').map((s) => s.trim()).filter(Boolean),
         }),
       });
@@ -107,6 +116,16 @@ export const CompetitorAuditView: React.FC<CompetitorAuditViewProps> = ({
             json.data.auditIntelligenceSummary ||
             `AI audit completed for ${domain}. Analyzed ad formats across Meta, Google, and LinkedIn.`,
         }));
+
+        if (json.data.competitor_niche || json.data.value_proposition || json.data.high_intent_keywords) {
+          setLiveData({
+            competitorNiche: json.data.competitor_niche,
+            valueProposition: json.data.value_proposition,
+            highIntentKeywords: json.data.high_intent_keywords,
+            recommendedAdAngles: json.data.recommended_ad_angles,
+            suggestedGoogleHeadlines: json.data.suggested_google_headlines,
+          });
+        }
       }
     } catch (e) {
       console.error('Audit failed:', e);
@@ -226,6 +245,65 @@ export const CompetitorAuditView: React.FC<CompetitorAuditViewProps> = ({
           </div>
         </div>
       </section>
+
+      {/* Live Intelligence Extracted Section */}
+      {(liveData.competitorNiche || liveData.valueProposition || (liveData.highIntentKeywords && liveData.highIntentKeywords.length > 0)) && (
+        <section className="bg-[#201f22] border border-[#8083ff]/40 rounded-xl p-5 sm:p-6 space-y-5 shadow-xl">
+          <div className="flex items-center justify-between border-b border-[#464554]/60 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#8083ff]">psychology</span>
+              <h2 className="text-lg font-bold text-[#e5e1e4]">Live Market Intelligence (Render API)</h2>
+            </div>
+            <span className="font-mono text-[11px] text-[#4edea3] bg-[#00a572]/15 px-2.5 py-1 rounded border border-[#4edea3]/30">
+              Connected Live
+            </span>
+          </div>
+
+          {liveData.competitorNiche && (
+            <div>
+              <span className="font-mono text-xs text-[#8083ff] uppercase font-semibold block mb-1">Competitor Niche</span>
+              <p className="text-sm font-semibold text-[#e5e1e4]">{liveData.competitorNiche}</p>
+            </div>
+          )}
+
+          {liveData.valueProposition && (
+            <div>
+              <span className="font-mono text-xs text-[#8083ff] uppercase font-semibold block mb-1">Core Value Proposition</span>
+              <p className="text-sm text-[#c7c4d7] leading-relaxed bg-[#141315] p-3 rounded-lg border border-[#464554]/40">{liveData.valueProposition}</p>
+            </div>
+          )}
+
+          {liveData.highIntentKeywords && liveData.highIntentKeywords.length > 0 && (
+            <div className="space-y-2">
+              <span className="font-mono text-xs text-[#8083ff] uppercase font-semibold block">Extracted High-Intent Keywords</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                {liveData.highIntentKeywords.map((item, idx) => (
+                  <div key={idx} className="bg-[#141315] border border-[#464554]/50 p-2.5 rounded-lg flex justify-between items-center text-xs">
+                    <div>
+                      <span className="font-bold text-[#e5e1e4] block truncate max-w-[140px]">{item.keyword}</span>
+                      <span className="font-mono text-[10px] text-[#908fa0]">{item.intent} Intent</span>
+                    </div>
+                    <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-[#353437] text-[#c0c1ff] font-semibold">
+                      {item.estimated_competition}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {liveData.recommendedAdAngles && liveData.recommendedAdAngles.length > 0 && (
+            <div className="space-y-2 pt-2 border-t border-[#464554]/40">
+              <span className="font-mono text-xs text-[#4edea3] uppercase font-semibold block">Recommended Ad Angles</span>
+              <ul className="space-y-1.5 list-disc list-inside text-xs text-[#c7c4d7]">
+                {liveData.recommendedAdAngles.map((angle, idx) => (
+                  <li key={idx} className="leading-relaxed">{angle}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Results Table / Identified Ads (Desktop Table + Mobile Cards) */}
       <section className="bg-[#201f22] border border-[#464554]/60 rounded-xl overflow-hidden shadow-lg">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TabType, CompetitorAd } from './types';
 import { Navbar } from './components/Navbar';
 import { CompetitorAuditView } from './components/CompetitorAuditView';
@@ -7,11 +7,30 @@ import { BannerStudioView } from './components/BannerStudioView';
 import { VideoCreatorView } from './components/VideoCreatorView';
 import { BudgetOptimizerView } from './components/BudgetOptimizerView';
 import { WorkspaceModal } from './components/WorkspaceModal';
+import { AuthModal, UserProfile } from './components/AuthModal';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('competitor-audit');
   const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [selectedCompetitorAdForCopy, setSelectedCompetitorAdForCopy] = useState<CompetitorAd | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('adsynthesize_user');
+    if (saved) {
+      try {
+        setUser(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse user profile', e);
+      }
+    }
+  }, []);
+
+  const handleSignOut = () => {
+    localStorage.removeItem('adsynthesize_user');
+    setUser(null);
+  };
 
   const handleSendToCopyGenerator = (ad: CompetitorAd) => {
     setSelectedCompetitorAdForCopy(ad);
@@ -25,6 +44,9 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenWorkspace={() => setIsWorkspaceOpen(true)}
+        user={user}
+        onOpenAuth={() => setIsAuthOpen(true)}
+        onSignOut={handleSignOut}
       />
 
       {/* Main View Container */}
@@ -50,7 +72,13 @@ export default function App() {
         onClose={() => setIsWorkspaceOpen(false)}
         onSelectTab={(tab) => setActiveTab(tab)}
       />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onLoginSuccess={(u) => setUser(u)}
+      />
     </div>
   );
 }
-

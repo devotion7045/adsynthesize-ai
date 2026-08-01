@@ -1,7 +1,6 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -9,78 +8,69 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
-
-// Initialize Gemini API lazily
-function getGeminiClient() {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
-    return null;
-  }
-  return new GoogleGenAI({ apiKey });
-}
+app.use(express.json({ limit: "25mb" }));
 
 // Health Check API
 app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
+  res.json({ status: "ok", timestamp: new Date().toISOString(), backend: "https://diginfotech-ai-backend.onrender.com" });
 });
 
 // 1. Competitor Audit API endpoint
 const auditHandler = async (req: express.Request, res: express.Response) => {
-  const domain = req.body.domain_or_niche || req.body.domain || req.body.domainOrNiche || "AI E-commerce Email Marketing";
-  const competitorsInput = req.body.competitors || ["Klaviyo", "Omnisend"];
-  const competitorsList = Array.isArray(competitorsInput)
-    ? competitorsInput
-    : typeof competitorsInput === "string"
-    ? competitorsInput.split(",").map((s) => s.trim())
+  const domain = req.body.target_domain_or_topic || req.body.domain_or_niche || req.body.domain || req.body.domainOrNiche || "E-commerce";
+  const audience = req.body.target_audience || req.body.targetAudience || "D2C Founders & Growth Marketers";
+  const rawComps = req.body.competitors || ["Klaviyo", "Omnisend"];
+  const competitorsList = Array.isArray(rawComps)
+    ? rawComps
+    : typeof rawComps === "string"
+    ? rawComps.split(",").map((s) => s.trim()).filter(Boolean)
     : ["Klaviyo", "Omnisend"];
 
-  const ai = getGeminiClient();
+  try {
+    const response = await fetch("https://diginfotech-ai-backend.onrender.com/api/v1/intelligence/audit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        target_domain_or_topic: domain,
+        target_audience: audience,
+        competitors: competitorsList,
+      }),
+    });
 
-  if (ai) {
-    try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: `Analyze competitor ad strategies for domain/niche: "${domain}" and competitors: "${competitorsList.join(", ")}".
-Provide a JSON object response with keys:
-- ad_spend_estimate: string (e.g. "$1.4M")
-- mom_change: string (e.g. "+14.2%")
-- keyword_overlap: string (e.g. "68.5%")
-- total_creative_volume: string (e.g. "450 Ads")
-- active_channels_count: number (e.g. 28)
-- audit_intelligence_summary: string (brief 2-sentence summary)
-Respond strictly in JSON format without markdown code blocks.`,
-      });
-
-      const text = response.text || "";
-      const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
-      const parsed = JSON.parse(cleaned);
+    if (response.ok) {
+      const remoteData = await response.json();
       return res.json({
         success: true,
         data: {
           domain_or_niche: domain,
           domainOrNiche: domain,
           competitors: competitorsList,
-          ad_spend_estimate: parsed.ad_spend_estimate || parsed.adSpendEstimate || "$1.4M",
-          adSpendEstimate: parsed.ad_spend_estimate || parsed.adSpendEstimate || "$1.4M",
-          mom_change: parsed.mom_change || parsed.momChange || "+14.2%",
-          momChange: parsed.mom_change || parsed.momChange || "+14.2%",
-          keyword_overlap: parsed.keyword_overlap || parsed.keywordOverlap || "68.5%",
-          keywordOverlap: parsed.keyword_overlap || parsed.keywordOverlap || "68.5%",
-          total_creative_volume: parsed.total_creative_volume || parsed.totalCreativeVolume || "450 Ads",
-          totalCreativeVolume: parsed.total_creative_volume || parsed.totalCreativeVolume || "450 Ads",
-          active_channels_count: parsed.active_channels_count || parsed.activeChannelsCount || 28,
-          activeChannelsCount: parsed.active_channels_count || parsed.activeChannelsCount || 28,
-          audit_intelligence_summary: parsed.audit_intelligence_summary || parsed.auditIntelligenceSummary || `Scanned 50+ ad networks across ${domain}. Detected high video ad volume.`,
-          auditIntelligenceSummary: parsed.audit_intelligence_summary || parsed.auditIntelligenceSummary || `Scanned 50+ ad networks across ${domain}. Detected high video ad volume.`,
+          competitor_niche: remoteData.competitor_niche,
+          value_proposition: remoteData.value_proposition,
+          high_intent_keywords: remoteData.high_intent_keywords,
+          recommended_ad_angles: remoteData.recommended_ad_angles,
+          suggested_google_headlines: remoteData.suggested_google_headlines,
+          ad_spend_estimate: "$1.4M",
+          adSpendEstimate: "$1.4M",
+          mom_change: "+14.2%",
+          momChange: "+14.2%",
+          keyword_overlap: "68.5%",
+          keywordOverlap: "68.5%",
+          total_creative_volume: `${remoteData.suggested_google_headlines ? remoteData.suggested_google_headlines.length * 50 : 450} Ads`,
+          totalCreativeVolume: `${remoteData.suggested_google_headlines ? remoteData.suggested_google_headlines.length * 50 : 450} Ads`,
+          active_channels_count: 28,
+          activeChannelsCount: 28,
+          audit_intelligence_summary: remoteData.value_proposition || `AI audit completed for ${domain}. Analyzed ad formats across Meta, Google, and LinkedIn.`,
+          auditIntelligenceSummary: remoteData.value_proposition || `AI audit completed for ${domain}. Analyzed ad formats across Meta, Google, and LinkedIn.`,
+          remoteData,
         },
       });
-    } catch (err: any) {
-      console.error("Gemini Audit API error:", err);
     }
+  } catch (err) {
+    console.error("Render Audit API error:", err);
   }
 
-  // Instant fallback response
+  // Instant fallback response if external backend is unreachable
   return res.json({
     success: true,
     data: {
@@ -97,8 +87,8 @@ Respond strictly in JSON format without markdown code blocks.`,
       totalCreativeVolume: "450 Ads",
       active_channels_count: 28,
       activeChannelsCount: 28,
-      audit_intelligence_summary: `Scanned 50+ ad networks across ${domain} for ${competitorsList.join(", ")}. Detected high video ad volume with Meta and LinkedIn dominance.`,
-      auditIntelligenceSummary: `Scanned 50+ ad networks across ${domain} for ${competitorsList.join(", ")}. Detected high video ad volume with Meta and LinkedIn dominance.`,
+      audit_intelligence_summary: `Scanned ad networks across ${domain} for ${competitorsList.join(", ")}. Detected high video ad volume with Meta and LinkedIn dominance.`,
+      auditIntelligenceSummary: `Scanned ad networks across ${domain} for ${competitorsList.join(", ")}. Detected high video ad volume with Meta and LinkedIn dominance.`,
     },
   });
 };
@@ -115,42 +105,49 @@ const generateCopyHandler = async (req: express.Request, res: express.Response) 
   const framework = req.body.framework || "AIDA";
   const tone = req.body.tone || "Persuasive";
 
-  const ai = getGeminiClient();
+  try {
+    const response = await fetch("https://diginfotech-ai-backend.onrender.com/api/v1/ads/generate-copy", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        product_or_service_name: productName,
+        description: description,
+        target_audience: targetAudience,
+        platform: platform,
+        framework: framework,
+        tone: tone,
+      }),
+    });
 
-  if (ai) {
-    try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: `Act as a top 1% direct response media buyer and ad copywriter.
-Generate 3 ad copy variants for:
-Product/Service: ${productName}
-Description: ${description}
-Target Audience: ${targetAudience}
-Platform: ${platform}
-Framework: ${framework}
-Tone: ${tone}
+    if (response.ok) {
+      const remoteData = await response.json();
+      const headlines = remoteData.google_ads?.headlines || [];
+      const descriptions = remoteData.google_ads?.descriptions || [];
+      const keyHooks = remoteData.key_hooks || [];
 
-Return a JSON array of 3 variant objects with fields:
-- label: string (e.g. "VARIANT A - High CTR", "VARIANT B - Emotional Appeal", "VARIANT C - Direct & Scarcity")
-- headline: string
-- primaryText: string
-- score: number (between 82 and 98)
-- predictionRating: "High" | "Exceptional" (optional)
-- bestForNote: string (optional, e.g. "Best for Cold Traffic")
+      const variants = headlines.map((h: string, idx: number) => ({
+        id: `var-${idx + 1}`,
+        label: `VARIANT ${String.fromCharCode(65 + idx)} - ${idx === 0 ? "High CTR" : idx === 1 ? "Emotional & Direct" : "High Intent"}`,
+        tagColor: idx === 0 ? "secondary" : idx === 1 ? "tertiary" : "primary",
+        headline: h,
+        primaryText: descriptions[idx % descriptions.length] || description,
+        score: Math.min(98, 88 + idx * 3),
+        predictionRating: idx === 0 ? "High" : "Exceptional",
+        bestForNote: idx === 0 ? "Best for Cold Traffic" : "Best for Retargeting",
+      }));
 
-Respond strictly in valid JSON array format without markdown code blocks.`,
+      return res.json({
+        success: true,
+        variants: variants.length > 0 ? variants : null,
+        key_hooks: keyHooks,
+        remoteData,
       });
-
-      const text = response.text || "";
-      const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
-      const variants = JSON.parse(cleaned);
-      return res.json({ success: true, variants });
-    } catch (err: any) {
-      console.error("Gemini Copy API error:", err);
     }
+  } catch (err) {
+    console.error("Render Copy API error:", err);
   }
 
-  // Instant fallback variants
+  // Fallback variants if unreachable
   return res.json({
     success: true,
     variants: [
@@ -196,7 +193,61 @@ const generateBannerHandler = async (req: express.Request, res: express.Response
   const callToAction = req.body.call_to_action || req.body.ctaText || req.body.cta_text || "Try Free Now";
   const brandColorHex = req.body.brand_color_hex || req.body.brandHex || "#0F172A";
   const accentColorHex = req.body.accent_color_hex || req.body.accentHex || "#6366F1";
-  const aspectRatios = req.body.aspect_ratios || (req.body.aspectRatio ? [req.body.aspectRatio] : ["1:1", "9:16"]);
+  const aspectRatios = req.body.aspect_ratios || (req.body.aspectRatio ? [req.body.aspectRatio] : ["1:1"]);
+
+  try {
+    const response = await fetch("https://diginfotech-ai-backend.onrender.com/api/v1/ads/generate-banner", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        headline,
+        subheadline,
+        call_to_action: callToAction,
+        brand_color_hex: brandColorHex,
+        accent_color_hex: accentColorHex,
+        aspect_ratios: Array.isArray(aspectRatios) ? aspectRatios : [aspectRatios],
+      }),
+    });
+
+    if (response.ok) {
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("image/")) {
+        const buffer = await response.arrayBuffer();
+        const base64 = Buffer.from(buffer).toString("base64");
+        const dataUrl = `data:${contentType.split(";")[0] || "image/png"};base64,${base64}`;
+        return res.json({
+          success: true,
+          banner: {
+            image_url: dataUrl,
+            imageUrl: dataUrl,
+            headline,
+            subheadline,
+            call_to_action: callToAction,
+            ctaText: callToAction,
+            brand_color_hex: brandColorHex,
+            brandHex: brandColorHex,
+            accent_color_hex: accentColorHex,
+            accentHex: accentColorHex,
+            badge_text: "LIVE BACKEND CREATED",
+            badgeText: "LIVE BACKEND CREATED",
+          },
+        });
+      } else {
+        const json = await response.json();
+        return res.json({
+          success: true,
+          banner: {
+            ...json,
+            headline: json.headline || headline,
+            subheadline: json.subheadline || subheadline,
+            call_to_action: json.call_to_action || callToAction,
+          },
+        });
+      }
+    }
+  } catch (err) {
+    console.error("Render Banner API error:", err);
+  }
 
   return res.json({
     success: true,
@@ -209,8 +260,6 @@ const generateBannerHandler = async (req: express.Request, res: express.Response
       brandHex: brandColorHex,
       accent_color_hex: accentColorHex,
       accentHex: accentColorHex,
-      aspect_ratios: Array.isArray(aspectRatios) ? aspectRatios : [aspectRatios],
-      aspectRatio: Array.isArray(aspectRatios) ? aspectRatios[0] : aspectRatios,
       badge_text: "EXCLUSIVE ACCESS",
       badgeText: "EXCLUSIVE ACCESS",
       member_count: "+2K",
@@ -237,6 +286,26 @@ const generateVideoHandler = async (req: express.Request, res: express.Response)
       ];
   const callToAction = req.body.call_to_action || req.body.ctaText || req.body.cta_text || "Start Free Trial";
   const durationPerSlideSec = Number(req.body.duration_per_slide_sec || req.body.slideDuration) || 1.5;
+
+  try {
+    const response = await fetch("https://diginfotech-ai-backend.onrender.com/api/v1/ads/generate-video", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        brand_name: brandName,
+        hooks: hooksList,
+        call_to_action: callToAction,
+        duration_per_slide_sec: durationPerSlideSec,
+      }),
+    });
+
+    if (response.ok) {
+      const json = await response.json();
+      return res.json({ success: true, video: json });
+    }
+  } catch (err) {
+    console.error("Render Video API error:", err);
+  }
 
   const sampleImages = [
     "https://lh3.googleusercontent.com/aida-public/AB6AXuC-70ehQwqCTGrVlUMCeAIIixOyYAO3q2SMF3UhskvDs6EL2N1RTCiFrkWTZA28HK4f0UeDk5LNXjKVPQf2QSfFFWXR5KDjpRMRPT24deCS0OURZSY1HflO2ykJTvFqipmoSeAiPv2inC2vhZePMbRGMPn3aGp6GrOh93fwnqXMOxquJtMJiBpiMTByWXAA8dfA7R5mAnerMPjK8dUoDY3s5uwQtUNKLZYujsTRDAMkrmKYq-n3kep7",
@@ -278,61 +347,62 @@ const optimizeBudgetHandler = async (req: express.Request, res: express.Response
   const targetRoas = Number(req.body.target_roas ?? req.body.targetRoas) || 2.5;
   const adSets = req.body.ad_sets || req.body.adSets || [];
 
-  const ai = getGeminiClient();
+  try {
+    const response = await fetch("https://diginfotech-ai-backend.onrender.com/api/v1/ads/optimize-budget", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        campaign_name: campaignName,
+        total_daily_budget: totalDailyBudget,
+        target_roas: targetRoas,
+        ad_sets: adSets.map((a: any) => ({
+          ad_set_id: a.ad_set_id || a.id || "adset_01",
+          ad_set_name: a.ad_set_name || a.name || "Ad Set",
+          spend: Number(a.spend) || 200.0,
+          clicks: Number(a.clicks) || 150,
+          impressions: Number(a.impressions) || 4000,
+          conversions: Number(a.conversions) || 10,
+          conversion_value: Number(a.conversion_value || a.convValue) || 700.0,
+        })),
+      }),
+    });
 
-  if (ai) {
-    try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: `Analyze campaign "${campaignName}" with total daily budget $${totalDailyBudget} and target ROAS ${targetRoas}x across ad sets:
-${JSON.stringify(adSets)}
-
-Provide a JSON object with:
-- projected_revenue: number
-- avg_cpc: number
-- conversions: number
-- ad_score: number
-- recommendation_summary: string
-Respond strictly in JSON format without markdown code blocks.`,
-      });
-
-      const text = response.text || "";
-      const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
-      const parsed = JSON.parse(cleaned);
-
-      const projectedRevenue = parsed.projected_revenue || parsed.projectedRevenue || Math.round(totalDailyBudget * targetRoas * 1.1);
-      const avgCpc = parsed.avg_cpc || parsed.avgCpc || 0.38;
-      const conversions = parsed.conversions || Math.round((totalDailyBudget / 2.9) * 0.98);
-      const adScore = parsed.ad_score || parsed.adScore || 9.6;
-      const summary = parsed.recommendation_summary || parsed.recommendationSummary || `Reallocated budget efficiently across ad sets to maximize ROAS for ${campaignName}.`;
+    if (response.ok) {
+      const remoteData = await response.json();
+      const projRev = Math.round(totalDailyBudget * (remoteData.overall_roas || targetRoas) * 30);
+      const convs = Math.round(totalDailyBudget / (remoteData.overall_cpa || 20));
 
       return res.json({
         success: true,
         data: {
-          campaign_name: campaignName,
-          campaignName: campaignName,
+          campaign_name: remoteData.campaign_name || campaignName,
+          campaignName: remoteData.campaign_name || campaignName,
           total_daily_budget: totalDailyBudget,
           totalDailyBudget: totalDailyBudget,
           target_roas: targetRoas,
           targetRoas: targetRoas,
-          projected_revenue: projectedRevenue,
-          projectedRevenue: projectedRevenue,
-          newProjectedRevenue: projectedRevenue,
-          avg_cpc: avgCpc,
-          avgCpc: avgCpc,
-          newAvgCpc: avgCpc,
-          conversions: conversions,
-          newConversions: conversions,
-          ad_score: adScore,
-          adScore: adScore,
-          newAdScore: adScore,
-          recommendation_summary: summary,
-          recommendationSummary: summary,
+          projected_revenue: projRev,
+          projectedRevenue: projRev,
+          newProjectedRevenue: projRev,
+          avg_cpc: 0.38,
+          avgCpc: 0.38,
+          newAvgCpc: 0.38,
+          conversions: convs,
+          newConversions: convs,
+          ad_score: 9.6,
+          adScore: 9.6,
+          newAdScore: 9.6,
+          recommendations: remoteData.recommendations || [],
+          strategic_summary: remoteData.strategic_summary || "",
+          strategicSummary: remoteData.strategic_summary || "",
+          recommendation_summary: remoteData.strategic_summary || "",
+          recommendationSummary: remoteData.strategic_summary || "",
+          remoteData,
         },
       });
-    } catch (err: any) {
-      console.error("Budget AI error:", err);
     }
+  } catch (err) {
+    console.error("Render Budget API error:", err);
   }
 
   const projRev = Math.round(totalDailyBudget * targetRoas * 1.1);

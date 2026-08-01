@@ -1,18 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TabType } from '../types';
+import { UserProfile } from './AuthModal';
 
 interface NavbarProps {
   activeTab: TabType;
   setActiveTab: (tab: TabType) => void;
   onOpenWorkspace: () => void;
+  user: UserProfile | null;
+  onOpenAuth: () => void;
+  onSignOut: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
   onOpenWorkspace,
+  user,
+  onOpenAuth,
+  onSignOut,
 }) => {
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
   const tabs: { id: TabType; label: string; shortLabel: string; icon: string }[] = [
     { id: 'competitor-audit', label: 'Competitor Audit', shortLabel: 'Audit', icon: 'analytics' },
@@ -34,7 +42,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <span className="material-symbols-filled text-[#c0c1ff] text-xl sm:text-2xl">dataset</span>
               <span className="tracking-tight">AdSynthesize AI</span>
-              <span className="w-2 h-2 bg-[#4edea3] rounded-full inline-block animate-pulse"></span>
+              <span className="hidden lg:inline-flex items-center gap-1 font-mono text-[10px] text-[#4edea3] bg-[#00a572]/15 px-2 py-0.5 rounded border border-[#4edea3]/30">
+                <span className="w-1.5 h-1.5 bg-[#4edea3] rounded-full animate-ping"></span>
+                Render Live Backend
+              </span>
             </button>
 
             {/* Desktop Nav Links */}
@@ -59,23 +70,65 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Right Action Items */}
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={onOpenWorkspace}
-              className="bg-[#201f22] border border-[#464554] hover:border-[#908fa0] px-2.5 sm:px-3.5 py-1.5 rounded-lg font-mono text-xs text-[#e5e1e4] hover:bg-[#353437] transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer active:scale-95"
+              className="bg-[#201f22] border border-[#464554] hover:border-[#908fa0] px-2.5 sm:px-3 py-1.5 rounded-lg font-mono text-xs text-[#e5e1e4] hover:bg-[#353437] transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
             >
               <span className="material-symbols-outlined text-[16px] text-[#c0c1ff]">folder_open</span>
               <span className="hidden sm:inline">Workspace</span>
             </button>
 
-            {/* User Profile Avatar */}
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border border-[#464554] shrink-0 bg-[#353437]">
-              <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOF4ZmIeIgsXo3RmM3zVtcKmrwVAXSJcvJztIauis8xQjtX6O79vIME61BWtfY-VgCaHOILslYUdEpfpPoIb0Vt73Yjs58NUaSndlIIeJisMG7P3cRpH9NuiPkEhKMohxQiNUQuSTNfPUMy_Akd7tQqiVxgSSfOnwVQ2sLOIi6L_QG1smmIKu_XRGa3QbIH_uT3vCWMGrHkStnBxj_umiEnhKCAZPJPd-vdeWvIpfA39a5BIORkiDo"
-                alt="User Avatar"
-                className="w-full h-full object-cover"
-              />
-            </div>
+            {/* Auth State & User Menu */}
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  className="flex items-center gap-2 bg-[#201f22] border border-[#464554] hover:border-[#8083ff] px-2 py-1 rounded-lg cursor-pointer transition-all"
+                >
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#8083ff] text-[#1000a9] font-bold text-xs flex items-center justify-center shrink-0">
+                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                  <span className="hidden sm:inline text-xs font-mono font-medium text-[#e5e1e4] truncate max-w-[110px]">
+                    {user.name}
+                  </span>
+                  <span className="material-symbols-outlined text-[16px] text-[#908fa0]">arrow_drop_down</span>
+                </button>
+
+                {/* User Dropdown */}
+                {profileDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-[#1e1d21] border border-[#464554] rounded-xl shadow-2xl p-3 space-y-3 z-50 animate-fade-in">
+                    <div className="border-b border-[#464554]/60 pb-2">
+                      <div className="font-bold text-xs text-[#e5e1e4] truncate">{user.name}</div>
+                      <div className="font-mono text-[11px] text-[#908fa0] truncate">{user.email}</div>
+                      <div className="mt-1.5 inline-block font-mono text-[10px] text-[#4edea3] bg-[#00a572]/15 px-2 py-0.5 rounded border border-[#4edea3]/30">
+                        {user.plan || 'Pro Member'}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        onSignOut();
+                      }}
+                      className="w-full text-left font-mono text-xs text-[#ffb4ab] hover:bg-[#201f22] p-2 rounded-lg transition-colors flex items-center gap-2 cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">logout</span>
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={onOpenAuth}
+                  className="bg-[#8083ff] text-[#1000a9] hover:bg-[#c0c1ff] px-3 py-1.5 rounded-lg font-mono text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                >
+                  Sign In / Register
+                </button>
+              </div>
+            )}
 
             {/* Mobile Hamburger Toggle */}
             <button
@@ -147,4 +200,3 @@ export const Navbar: React.FC<NavbarProps> = ({
     </>
   );
 };
-
